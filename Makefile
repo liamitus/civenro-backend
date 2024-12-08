@@ -13,91 +13,86 @@ help:
 	@echo "Usage: make [target]"
 	@echo ""
 	@echo "Targets:"
-	@echo "  install     Install backend dependencies"
-	@echo "  dev         Run the development server"
-	@echo "  migrate     Run Prisma migrations"
-	@echo "  generate    Generate Prisma client"
-	@echo "  sql         Open Prisma Studio"
-	@echo "  seed        Seed the database"
-	@echo "  lint        Lint the codebase"
-	@echo "  format      Format the codebase"
-	@echo "  test        Run tests"
-	@echo "  help        Show this help message"
+	@echo "  fetch-bills     Fetch bills data"
+	@echo "  fetch-data      Fetch data"
+	@echo "  fetch-representatives Fetch representatives data"
+	@echo "  db              Run the database"
+	@echo "  format          Format the codebase"
+	@echo "  generate        Generate Prisma client"
+	@echo "  install         Install backend dependencies"
+	@echo "  lint            Lint the codebase"
+	@echo "  migrate         Run Prisma migrations"
+	@echo "  seed            Seed the database"
+	@echo "  sql             Open Prisma Studio"
+	@echo "  start dev run   Run the development server"
+	@echo "  test            Run tests"
 
-# Install backend dependencies
-install:
-	@echo "Installing backend dependencies..."
-	npm install
+# Run the database
+db: .PHONY
+	@echo "Running the database..."
+	docker compose up
 
-.PHONY: install
+fetch-bills: .PHONY
+	@echo "Fetching bills data..."
+	npx ts-node src/scripts/fetchBills.ts
 
-# Run the development server
-start dev run:
-	@echo "Starting the development server..."
-	npm run dev
-.PHONY: start dev run
-
-# Run Prisma migrations
-migrate:
-	@echo "Running Prisma migrations..."
-	npx prisma migrate dev
-.PHONY: migrate
-
-# Generate Prisma client
-generate:
-	@echo "Generating Prisma client..."
-	npx prisma generate
-.PHONY: generate
-
-# Open Prisma Studio
-studio sql:
-	@echo "Opening Prisma Studio..."
-	npx prisma studio
-.PHONY: studio sql
-
-# Seed the database
-seed:
-	@echo "Seeding the database..."
-	npx prisma db seed
-.PHONY: seed
-
-# Lint the codebase
-lint:
-	@echo "Linting the codebase..."
-	npm run lint
-.PHONY: lint
-
-# Format the codebase
-format:
-	@echo "Formatting the codebase..."
-	npx prisma format
-.PHONY: format
-
-# Run tests
-test:
-	@echo "Running tests..."
-	npm run test
-.PHONY: test
-
-# Fetch data
-fetch-data fetch:
+fetch-data fetch: .PHONY
 	@echo "Fetching data..."
 	npx ts-node src/scripts/fetchRepresentatives.ts
 	npx ts-node src/scripts/fetchBills.ts
 	npx ts-node src/scripts/fetchVotes.ts
-.PHONY: fetchd-ata fetch
 
-fetch-representatives:
+fetch-representatives: .PHONY
 	@echo "Fetching representatives data..."
 	npx ts-node src/scripts/fetchRepresentatives.ts
-.PHONY: fetch-representatives
 
-fetch-bills:
-	@echo "Fetching bills data..."
-	npx ts-node src/scripts/fetchBills.ts
-.PHONY: fetch-bills
-
-fetch-votes:
+fetch-votes: .PHONY
 	@echo "Fetching votes data..."
 	npx ts-node src/scripts/fetchVotes.ts
-.PHONY: fetch-votes
+
+# Format the codebase
+format: .PHONY
+	@echo "Formatting the codebase..."
+	npx prisma format
+
+# Generate Prisma client
+generate: .PHONY
+	@echo "Generating Prisma client..."
+	npx prisma generate
+
+# Install backend dependencies
+install: .PHONY
+	@echo "Installing backend dependencies..."
+	npm install
+
+# Lint the codebase
+lint: .PHONY
+	@echo "Linting the codebase..."
+	npm run lint
+
+# Run Prisma migrations
+migrate: .PHONY
+	@echo "Running Prisma migrations..."
+	npx prisma migrate dev
+
+# Seed the database
+seed: .PHONY
+	@echo "Seeding the database..."
+	npx prisma db seed
+
+# Open Prisma Studio
+sql: .PHONY
+	@echo "Opening Prisma Studio..."
+	npx prisma studio
+
+# Run the development server
+start dev run: .PHONY
+	@echo "Starting the development server..."
+	npm run dev
+
+# Run tests
+test: .PHONY
+	@echo "Running tests..."
+	npm run test
+
+.PHONY:

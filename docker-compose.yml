@@ -1,0 +1,15 @@
+services:
+  db:
+    image: postgres:15
+    restart: always
+    environment:
+      POSTGRES_USER: dev_admin
+      POSTGRES_PASSWORD: DO_NOT_USE_IN_PRODUCTION
+      POSTGRES_DB: voxpup_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+
+volumes:
+  db-data:
