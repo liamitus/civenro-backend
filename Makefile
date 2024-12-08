@@ -19,6 +19,7 @@ help:
 	@echo "  db              Run the database"
 	@echo "  format          Format the codebase"
 	@echo "  generate        Generate Prisma client"
+	@echo "  init            Initialize the database"
 	@echo "  install         Install backend dependencies"
 	@echo "  lint            Lint the codebase"
 	@echo "  migrate         Run Prisma migrations"
@@ -59,6 +60,10 @@ format: .PHONY
 generate: .PHONY
 	@echo "Generating Prisma client..."
 	npx prisma generate
+
+init: .PHONY
+	@echo "Initializing the database..."
+	npx prisma db push
 
 # Install backend dependencies
 install: .PHONY
