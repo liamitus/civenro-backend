@@ -28,6 +28,22 @@ router.post('/', authenticateToken, async (req: Request, res: Response) => {
     return res.status(400).json({ error: 'Comment is too long.' });
   }
 
+  // Add check to prevent duplicate comments
+  const recentComment = await prisma.comment.findFirst({
+    where: {
+      userId,
+      billId,
+      content,
+      date: {
+        gte: new Date(Date.now() - 60000), // within the last 60 seconds
+      },
+    },
+  });
+
+  if (recentComment) {
+    return res.status(429).json({ error: 'Duplicate comment detected' });
+  }
+
   try {
     // Check if the bill exists
     const bill = await prisma.bill.findUnique({
