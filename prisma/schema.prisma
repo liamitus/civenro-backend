@@ -1,0 +1,101 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id          Int           @id @default(autoincrement())
+  username    String        @unique
+  email       String        @unique
+  password    String
+  createdAt   DateTime      @default(now())
+  votes       Vote[]
+  comments    Comment[]
+  CommentVote CommentVote[]
+}
+
+model Bill {
+  id                Int                  @id @default(autoincrement())
+  billId            String               @unique
+  title             String
+  date              DateTime
+  billType          String
+  currentChamber    String?
+  currentStatus     String
+  currentStatusDate DateTime
+  introducedDate    DateTime
+  link              String
+  votes             RepresentativeVote[]
+  Vote              Vote[]
+  Comment           Comment[]
+}
+
+model Vote {
+  id       Int    @id @default(autoincrement())
+  userId   Int
+  billId   Int
+  voteType String
+
+  user User @relation(fields: [userId], references: [id])
+  bill Bill @relation(fields: [billId], references: [id])
+
+  @@unique([userId, billId]) // Prevent duplicate votes by the same user
+}
+
+model Comment {
+  id              Int      @id @default(autoincrement())
+  content         String
+  userId          Int
+  billId          Int
+  parentCommentId Int? // Added for nested comments
+  date            DateTime @default(now())
+
+  user          User      @relation(fields: [userId], references: [id])
+  bill          Bill      @relation(fields: [billId], references: [id])
+  parentComment Comment?  @relation("CommentToReplies", fields: [parentCommentId], references: [id])
+  replies       Comment[] @relation("CommentToReplies")
+
+  CommentVote CommentVote[]
+}
+
+model CommentVote {
+  id        Int @id @default(autoincrement())
+  userId    Int
+  commentId Int
+  voteType  Int // 1 for upvote, -1 for downvote
+
+  user    User    @relation(fields: [userId], references: [id])
+  comment Comment @relation(fields: [commentId], references: [id])
+
+  @@unique([userId, commentId])
+}
+
+model Representative {
+  id                  Int                  @id @default(autoincrement())
+  bioguideId          String               @unique
+  firstName           String
+  lastName            String
+  state               String
+  district            String? // For House representatives
+  party               String
+  chamber             String // 'house' or 'senate'
+  imageUrl            String?
+  link                String?
+  RepresentativeVotes RepresentativeVote[]
+}
+
+model RepresentativeVote {
+  id               Int    @id @default(autoincrement())
+  representativeId Int
+  billId           Int
+  vote             String // 'Yea', 'Nay', 'Present', 'Not Voting', etc.
+
+  representative Representative @relation(fields: [representativeId], references: [id])
+  bill           Bill           @relation(fields: [billId], references: [id])
+
+  @@unique([representativeId, billId])
+}
