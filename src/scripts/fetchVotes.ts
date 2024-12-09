@@ -9,7 +9,7 @@ const prisma = new PrismaClient({
 });
 const BASE_URL = 'https://www.govtrack.us/api/v2';
 
-async function fetchVotes() {
+export async function fetchVotesFunction() {
   try {
     const startDate = dayjs().subtract(1, 'month'); // Adjust as needed
     const endDate = dayjs();
@@ -139,5 +139,3 @@ async function fetchVotes() {
     await prisma.$disconnect();
   }
 }
-
-fetchVotes();

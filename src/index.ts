@@ -6,6 +6,7 @@ dotenv.config();
 import express from 'express';
 import cors from 'cors';
 import { PrismaClient } from '@prisma/client';
+import adminRouter from './routes/admin';
 import authRouter from './routes/auth';
 import billsRouter from './routes/bills';
 import commentsRouter from './routes/comments';
@@ -30,6 +31,7 @@ app.use(
 app.use(express.json());
 
 // Define routes here
+app.use('/api/admin', adminRouter);
 app.use('/api/auth', authRouter);
 app.use('/api/bills', billsRouter);
 app.use('/api/comments', commentsRouter);

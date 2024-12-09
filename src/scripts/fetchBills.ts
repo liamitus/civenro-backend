@@ -9,17 +9,15 @@ const prisma = new PrismaClient({
 });
 const BASE_URL = 'https://www.govtrack.us/api/v2';
 
-async function fetchBills() {
+export async function fetchBillsFunction() {
   try {
-    // Determine the start date based on existing data
-    let lastBill: Bill | null = await prisma.bill.findFirst({
+    let lastBill = await prisma.bill.findFirst({
       orderBy: { introducedDate: 'desc' },
     });
     const startDate = lastBill
       ? dayjs(lastBill.introducedDate).subtract(6, 'months')
-      : dayjs('1980-01-01'); // Initial run: start from year 2000
+      : dayjs('1980-01-01');
     const endDate = dayjs();
-
     let currentDate = startDate;
 
     while (currentDate.isBefore(endDate)) {
@@ -89,5 +87,3 @@ async function fetchBills() {
     await prisma.$disconnect();
   }
 }
-
-fetchBills();

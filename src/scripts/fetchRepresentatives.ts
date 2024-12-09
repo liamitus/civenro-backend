@@ -6,7 +6,7 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 const BASE_URL = 'https://www.govtrack.us/api/v2';
 
-async function fetchRepresentatives() {
+export async function fetchRepresentativesFunction() {
   try {
     // Fetch current members of Congress
     const params = {
@@ -56,10 +56,8 @@ async function fetchRepresentatives() {
     }
     console.log('Representatives fetched and stored successfully.');
   } catch (error) {
-    console.error('Error fetching representatives:', error);
+    console.error('Error fetching representatives:', (error as Error).message);
   } finally {
     await prisma.$disconnect();
   }
 }
-
-fetchRepresentatives();
