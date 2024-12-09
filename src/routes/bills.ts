@@ -1,4 +1,4 @@
-// backend/src/routes/bills.ts
+// src/routes/bills.ts
 
 import { Router } from 'express';
 import { PrismaClient } from '@prisma/client';

@@ -1,4 +1,4 @@
-// backend/src/routes/comments.ts
+// src/routes/comments.ts
 
 import { Router, Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';

@@ -1,4 +1,4 @@
-// backend/src/routes/representatives.ts
+// src/routes/representatives.ts
 
 import { Router, Request, Response } from 'express';
 import { authenticateToken } from '../middleware/auth';

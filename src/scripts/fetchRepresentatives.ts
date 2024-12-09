@@ -1,4 +1,4 @@
-// backend/src/scripts/fetchRepresentatives.ts
+// src/scripts/fetchRepresentatives.ts
 
 import axios from 'axios';
 import { PrismaClient } from '@prisma/client';

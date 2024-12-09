@@ -1,4 +1,4 @@
-// backend/src/index.ts
+// src/index.ts
 
 import dotenv from 'dotenv';
 dotenv.config();

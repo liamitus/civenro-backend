@@ -1,7 +1,7 @@
-// backend/src/scripts/fetchBills.ts
+// src/scripts/fetchBills.ts
 
 import axios from 'axios';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Bill } from '@prisma/client';
 import dayjs from 'dayjs';
 
 const prisma = new PrismaClient({
@@ -11,8 +11,14 @@ const BASE_URL = 'https://www.govtrack.us/api/v2';
 
 async function fetchBills() {
   try {
-    const startDate = dayjs().subtract(6, 'months'); // Adjust as needed
-    const endDate = dayjs(); // Current date
+    // Determine the start date based on existing data
+    let lastBill: Bill | null = await prisma.bill.findFirst({
+      orderBy: { introducedDate: 'desc' },
+    });
+    const startDate = lastBill
+      ? dayjs(lastBill.introducedDate).subtract(6, 'months')
+      : dayjs('1980-01-01'); // Initial run: start from year 2000
+    const endDate = dayjs();
 
     let currentDate = startDate;
 
@@ -69,6 +75,9 @@ async function fetchBills() {
           console.error(`Error upserting bill ${billId}:`, error.message);
         }
       }
+
+      // Add a delay to respect API rate limits
+      await new Promise((resolve) => setTimeout(resolve, 500)); // 500ms delay
 
       currentDate = nextDate;
     }

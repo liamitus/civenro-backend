@@ -1,4 +1,4 @@
-// backend/src/scripts/fetchVotes.ts
+// src/scripts/fetchVotes.ts
 
 import axios from 'axios';
 import { PrismaClient } from '@prisma/client';

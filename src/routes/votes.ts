@@ -1,4 +1,4 @@
-// backend/src/routes/votes.ts
+// src/routes/votes.ts
 
 import { Router, Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
