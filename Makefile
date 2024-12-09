@@ -3,9 +3,6 @@
 # Specify the shell to use (optional, defaults to /bin/sh)
 SHELL := /bin/bash
 
-# Variables
-DB_URL := $(shell grep DATABASE_URL .env | cut -d '=' -f2)
-
 # Display help
 help:
 	@echo "Civenro Backend Makefile"
