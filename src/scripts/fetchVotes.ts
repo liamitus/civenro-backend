@@ -11,7 +11,7 @@ const BASE_URL = 'https://www.govtrack.us/api/v2';
 
 export async function fetchVotesFunction() {
   try {
-    const startDate = dayjs().subtract(1, 'month'); // Adjust as needed
+    const startDate = dayjs().subtract(4, 'year'); // Adjust as needed
     const endDate = dayjs();
 
     let currentDate = startDate;
