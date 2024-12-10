@@ -170,6 +170,44 @@ router.get('/user/:userId', async (req: Request, res: Response) => {
   }
 });
 
+// DELETE /api/comments/:id
+// Allow authenticated users to delete their own comment
+router.delete(
+  '/:id',
+  authenticateToken,
+  async (req: Request, res: Response) => {
+    const commentId = parseInt(req.params.id);
+    const userId = req.user?.userId;
+
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    try {
+      const comment = await prisma.comment.findUnique({
+        where: { id: commentId },
+      });
+
+      if (!comment) {
+        return res.status(404).json({ error: 'Comment not found' });
+      }
+
+      if (comment.userId !== userId) {
+        return res.status(403).json({ error: 'Forbidden' });
+      }
+
+      await prisma.comment.delete({
+        where: { id: commentId },
+      });
+
+      res.status(200).json({ message: 'Comment deleted successfully' });
+    } catch (error) {
+      console.error('Error deleting comment:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  }
+);
+
 // Update the getCommentsWithVotes function to accept sortOption and fetch replies correctly
 async function getCommentsWithVotes(
   parentCommentId: number | null,
