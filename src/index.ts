@@ -18,11 +18,10 @@ import votesRouter from './routes/votes';
 const app = express();
 const prisma = new PrismaClient();
 const PORT = process.env.PORT || 5001;
-const CORS_ORIGIN_PORT = process.env.CORS_ORIGIN_PORT || 4000;
 
 app.use(
   cors({
-    origin: `http://localhost:${CORS_ORIGIN_PORT}`, // Frontend URL
+    origin: `${process.env.REACT_APP_URL}`, // Frontend URL
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     credentials: true,
   })
