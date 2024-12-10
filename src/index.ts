@@ -21,7 +21,7 @@ const PORT = process.env.PORT || 5001;
 
 app.use(
   cors({
-    origin: `${process.env.REACT_APP_URL}`, // Frontend URL
+    origin: `${process.env.FRONTEND_URL}`,
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     credentials: true,
   })
