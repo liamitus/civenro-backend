@@ -1,7 +1,7 @@
 import request from 'supertest';
 import { PrismaClient } from '@prisma/client';
 import jwt from 'jsonwebtoken';
-import app from '../src/index'; // Ensure index.ts exports the Express app
+import app from '../../src/index'; // Ensure index.ts exports the Express app
 
 const prisma = new PrismaClient();
 const JWT_SECRET = process.env.JWT_SECRET || 'your_jwt_secret_key';
