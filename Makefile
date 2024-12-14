@@ -97,4 +97,8 @@ test: .PHONY
 	@echo "Running tests..."
 	npm run test
 
+test-debug: .PHONY
+	@echo "Running tests in debug mode..."
+	npm run test:debug
+
 .PHONY:

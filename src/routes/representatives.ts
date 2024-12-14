@@ -1,7 +1,6 @@
 // src/routes/representatives.ts
 
 import { Router, Request, Response } from 'express';
-import { authenticateToken } from '../middleware/auth';
 import { getRepresentativesByAddress } from '../utils/civicApi';
 import { PrismaClient } from '@prisma/client';
 

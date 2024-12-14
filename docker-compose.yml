@@ -5,7 +5,7 @@ services:
     environment:
       POSTGRES_USER: dev_admin
       POSTGRES_PASSWORD: DO_NOT_USE_IN_PRODUCTION
-      POSTGRES_DB: voxpup_db
+      POSTGRES_DB: civenro_db
     ports:
       - "5432:5432"
     volumes:

@@ -1,7 +1,11 @@
 // src/index.ts
 
 import dotenv from 'dotenv';
-dotenv.config();
+
+if (process.env.NODE_ENV !== 'test') {
+  console.log('Loading .env file');
+  dotenv.config();
+}
 
 import express from 'express';
 import cors from 'cors';
@@ -44,6 +48,10 @@ app.get('/', (req, res) => {
   res.send('Government Bills Platform API is running.');
 });
 
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
+if (process.env.NODE_ENV !== 'test') {
+  app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+  });
+}
+
+export default app;
