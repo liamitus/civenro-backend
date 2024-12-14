@@ -1,3 +1,5 @@
+// __tests__/routes/auth.test.ts
+
 import request from 'supertest';
 import { PrismaClient } from '@prisma/client';
 import jwt from 'jsonwebtoken';
