@@ -2,10 +2,9 @@
 
 import { Router, Request, Response } from 'express';
 import { getRepresentativesByAddress } from '../utils/civicApi';
-import { PrismaClient } from '@prisma/client';
+import prisma from '../prismaClient';
 
 const router = Router();
-const prisma = new PrismaClient();
 
 type Representative = {
   bioguideId: string;
@@ -36,11 +35,18 @@ router.post('/by-address', async (req: Request, res: Response) => {
     // Process the data to extract representatives
     const { officials } = data;
 
+    const extractBioguideId = (photoUrl: string): string => {
+      const match = photoUrl?.match(
+        /bioguide\.congress\.gov\/[A-Z]\/([A-Z0-9]+)\.jpg$/
+      );
+      return match ? match[1] : '';
+    };
+
     const reps: Representative[] = officials.map((official: any) => ({
       name: official.name,
       party: official.party,
       office: official.officeName || '',
-      bioguideId: official.bioguideId || '',
+      bioguideId: official.bioguideId || extractBioguideId(official.photoUrl),
       chamber: official.chamber || '',
     }));
 
