@@ -30,8 +30,8 @@ The **Civenro Backend** provides the server-side logic, database interactions, a
 
 ### Deployment
 
-- **Backend:** Hosted on Heroku (or your chosen platform) for scalability and convenience.
-- **Database:** Heroku Postgres or another managed Postgres service.
+- **Backend:** Hosted on Railway.app for scalability, ease of deployment, and modern infrastructure.
+- **Database:** Railway Postgres or another managed Postgres service.
 
 ## Installation
 
