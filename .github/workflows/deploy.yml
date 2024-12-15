@@ -52,15 +52,18 @@ jobs:
           echo DATABASE_URL=${{ secrets.STAGING_DATABASE_URL }} >> .env
           echo JWT_SECRET=${{ secrets.JWT_SECRET_STAGING }} >> .env
 
-      # Optionally, run a schema consistency check here if you have a script for that:
-      # - name: Schema consistency check (optional)
-      #   run: npm run schema:check
+      - name: Wait for Database
+        run: |
+          for i in {1..5}; do
+            pg_isready -d ${{ secrets.STAGING_DATABASE_URL }} && break
+            echo "Database not ready, waiting..."
+            sleep 5
+          done
 
-      - name: Run migrations on staging
-        run: npx prisma migrate deploy
-
-      - name: Seed staging database
-        run: npm run seed
+      - name: Reset and Seed Database
+        run: |
+          npx prisma migrate reset --force
+          npm run seed
 
   deploy:
     name: Deploy to Railway (Production)
