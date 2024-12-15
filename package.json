@@ -13,7 +13,7 @@
     "test:db:stop": "docker compose -f docker-compose.test.yml down --volumes",
     "test:db:prepare": "npx prisma migrate dev --name init-test",
     "test:wait": "for i in {1..10}; do pg_isready -h localhost -p 5433 -U postgres && break || sleep 3; done",
-    "seed": "ts-node scripts/seed.ts",
+    "seed": "ts-node src/scripts/seed.ts",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "deploy": "prisma migrate deploy && prisma db seed"
