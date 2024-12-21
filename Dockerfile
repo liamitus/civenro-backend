@@ -1,21 +1,20 @@
 # civenro-backend/Dockerfile
-FROM node:23-slim
 
-# 1. Create app directory
+FROM node:23-alpine
+
 WORKDIR /app
 
-# 2. Copy package files and install dependencies
+# 1. Install the compatibility package so libssl.so.1.1 is available
+RUN apk add --no-cache openssl1.1-compat
+
+# 2. Install dependencies
 COPY package*.json ./
 RUN npm ci
 
-# 3. Copy the rest of the backend code
+# 3. Copy code & generate Prisma client & build
 COPY . .
-
-# 4. Build the TypeScript code (if needed)
+RUN npx prisma generate
 RUN npm run build
 
-# 5. Expose the port the backend runs on
 EXPOSE 5001
-
-# 6. Default command
 CMD ["node", "dist/index.js"]
