@@ -1,10 +1,8 @@
 # civenro-backend/Dockerfile
-FROM node:23-alpine
+FROM node:23-slim
 
+# 1. Create app directory
 WORKDIR /app
-
-# 1. Install the compatibility package so libssl.so.1.1 is available
-RUN apk add --no-cache openssl1.1-compat
 
 # 2. Copy package files and install dependencies
 COPY package*.json ./
