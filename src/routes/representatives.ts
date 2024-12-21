@@ -8,17 +8,10 @@ const router = Router();
 
 type Representative = {
   bioguideId: string;
-  name: any;
-  party: any;
-  office: any;
+  name: string;
+  party: string;
+  office: string;
   chamber: string;
-};
-
-type RepresentativeDetails = {
-  levels: string | string[];
-  roles: string | string[];
-  officialIndices: number[];
-  name: any;
 };
 
 // POST /api/representatives/by-address
@@ -42,13 +35,19 @@ router.post('/by-address', async (req: Request, res: Response) => {
       return match ? match[1] : '';
     };
 
-    const reps: Representative[] = officials.map((official: any) => ({
-      name: official.name,
-      party: official.party,
-      office: official.officeName || '',
-      bioguideId: official.bioguideId || extractBioguideId(official.photoUrl),
-      chamber: official.chamber || '',
-    }));
+    const reps: Representative[] = officials.map(
+      (official: Record<string, unknown>) => ({
+        name: official.name,
+        party: official.party,
+        office: official.officeName || '',
+        bioguideId:
+          official.bioguideId ||
+          (typeof official.photoUrl === 'string'
+            ? extractBioguideId(official.photoUrl)
+            : 'unknown'),
+        chamber: official.chamber || '',
+      })
+    );
 
     // Fetch the bill from the database
     const bill = await prisma.bill.findUnique({

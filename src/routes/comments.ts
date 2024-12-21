@@ -7,15 +7,22 @@ import { authenticateToken } from '../middleware/auth';
 const router = Router();
 const prisma = new PrismaClient();
 
+interface CreateCommentBody {
+  billId: number;
+  content: string;
+  parentCommentId?: number;
+}
+
 // POST /api/comments
 // Submit a comment on a bill
 router.post('/', authenticateToken, async (req: Request, res: Response) => {
+  const body = req.body as CreateCommentBody;
   // Access req.user, making sure to handle the possibility that it might be undefined
   if (!req.user || !req.user.userId) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
 
-  const { billId, content, parentCommentId } = req.body;
+  const { billId, content, parentCommentId } = body;
   const userId = req.user.userId;
 
   // Basic validation
@@ -209,13 +216,28 @@ router.delete(
 );
 
 // Update the getCommentsWithVotes function to accept sortOption and fetch replies correctly
+type ExtendedComment = {
+  id: number;
+  user: { username?: string | null };
+  [key: string]: unknown;
+};
+
+type CommentWithReplies = {
+  id: number;
+  user: { username?: string | null };
+  username: string;
+  voteCount: number;
+  replies: CommentWithReplies[];
+  [key: string]: unknown;
+};
+
 async function getCommentsWithVotes(
   parentCommentId: number | null,
   billId: number,
   sortOption: string,
   skip: number,
   take: number
-): Promise<any[]> {
+): Promise<CommentWithReplies[]> {
   const comments = await prisma.comment.findMany({
     where: {
       billId,
@@ -233,10 +255,10 @@ async function getCommentsWithVotes(
 
   // Fetch vote counts and replies for each comment
   const commentsWithVotes = await Promise.all(
-    comments.map(async (comment: any) => {
-      const voteCount = await getVoteCount(comment.id);
+    comments.map(async (comment: ExtendedComment) => {
+      const voteCount = await getVoteCount(comment.id as number);
       const replies = await getCommentsWithVotes(
-        comment.id,
+        comment.id as number,
         billId,
         sortOption,
         0,

@@ -9,7 +9,6 @@ if (process.env.NODE_ENV !== 'test') {
 
 import express from 'express';
 import cors from 'cors';
-import { PrismaClient } from '@prisma/client';
 import adminRouter from './routes/admin';
 import authRouter from './routes/auth';
 import billsRouter from './routes/bills';
@@ -20,7 +19,6 @@ import userRouter from './routes/users';
 import votesRouter from './routes/votes';
 
 const app = express();
-const prisma = new PrismaClient();
 const PORT = process.env.PORT || 5001;
 
 app.use(

@@ -7,7 +7,7 @@ import { authenticateToken } from '../../src/middleware/auth';
 const JWT_SECRET = process.env.JWT_SECRET || 'your_jwt_secret_key';
 
 describe('authenticateToken middleware', () => {
-  let req: Partial<Request> & { user?: any };
+  let req: Partial<Request> & { user?: Record<string, unknown> };
   let res: Partial<Response>;
   let next: NextFunction;
 

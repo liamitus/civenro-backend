@@ -20,8 +20,8 @@ router.post('/fetch-bills', async (req, res) => {
   try {
     await fetchBillsFunction();
     res.json({ message: 'Bills fetched successfully.' });
-  } catch (error: any) {
-    console.error('Error in fetch-bills endpoint:', error.message);
+  } catch (error: unknown) {
+    console.error('Error in fetch-bills endpoint:', (error as Error).message);
     res.status(500).json({ error: 'Failed to fetch bills.' });
   }
 });
@@ -30,8 +30,11 @@ router.post('/fetch-representatives', async (req, res) => {
   try {
     await fetchRepresentativesFunction();
     res.json({ message: 'Representatives fetched successfully.' });
-  } catch (error: any) {
-    console.error('Error in fetch-representatives endpoint:', error.message);
+  } catch (error: unknown) {
+    console.error(
+      'Error in fetch-representatives endpoint:',
+      (error as Error).message
+    );
     res.status(500).json({ error: 'Failed to fetch representatives.' });
   }
 });
@@ -40,8 +43,8 @@ router.post('/fetch-votes', async (req, res) => {
   try {
     await fetchVotesFunction();
     res.json({ message: 'Votes fetched successfully.' });
-  } catch (error: any) {
-    console.error('Error in fetch-votes endpoint:', error.message);
+  } catch (error: unknown) {
+    console.error('Error in fetch-votes endpoint:', (error as Error).message);
     res.status(500).json({ error: 'Failed to fetch votes.' });
   }
 });

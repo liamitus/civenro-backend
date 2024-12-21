@@ -9,6 +9,18 @@ const prisma = new PrismaClient({
 });
 const BASE_URL = 'https://www.govtrack.us/api/v2';
 
+interface GovTrackBillData {
+  bill_type: string;
+  number: number;
+  congress: number;
+  introduced_date: string;
+  current_chamber: string | null;
+  current_status: string;
+  current_status_date: string;
+  link: string;
+  title_without_number: string;
+}
+
 export async function fetchVotesFunction() {
   try {
     const startDate = dayjs().subtract(4, 'year'); // Adjust as needed
@@ -17,7 +29,7 @@ export async function fetchVotesFunction() {
     let currentDate = startDate;
 
     // Implement a cache for bills to avoid redundant API calls
-    const billCache: { [key: number]: any } = {};
+    const billCache: Record<number, GovTrackBillData> = {};
 
     while (currentDate.isBefore(endDate)) {
       const nextDate = currentDate.add(1, 'day');
@@ -74,7 +86,7 @@ export async function fetchVotesFunction() {
             const billResponse = await axios.get(
               `${BASE_URL}/bill/${relatedBillId}`
             );
-            billData = billResponse.data;
+            billData = billResponse.data as GovTrackBillData;
             billCache[relatedBillId] = billData; // Cache the bill data
           }
 
@@ -124,8 +136,8 @@ export async function fetchVotesFunction() {
               vote: voteVoter.option.value,
             },
           });
-        } catch (error: any) {
-          console.error('Error processing vote:', error.message);
+        } catch (error: unknown) {
+          console.error('Error processing vote:', (error as Error).message);
         }
       }
 
@@ -133,8 +145,8 @@ export async function fetchVotesFunction() {
     }
 
     console.log('Votes fetched and stored successfully.');
-  } catch (error: any) {
-    console.error('Error fetching votes:', error.message);
+  } catch (error: unknown) {
+    console.error('Error fetching votes:', (error as Error).message);
   } finally {
     await prisma.$disconnect();
   }

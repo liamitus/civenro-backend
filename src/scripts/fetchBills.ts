@@ -1,7 +1,7 @@
 // src/scripts/fetchBills.ts
 
 import axios from 'axios';
-import { PrismaClient, Bill } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 import dayjs from 'dayjs';
 
 const prisma = new PrismaClient({
@@ -69,8 +69,11 @@ export async function fetchBillsFunction() {
           });
 
           console.log(`Upserted bill ${billId}`);
-        } catch (error: any) {
-          console.error(`Error upserting bill ${billId}:`, error.message);
+        } catch (error: unknown) {
+          console.error(
+            `Error upserting bill ${billId}:`,
+            (error as Error).message
+          );
         }
       }
 
@@ -81,8 +84,8 @@ export async function fetchBillsFunction() {
     }
 
     console.log('Bills fetched and stored successfully.');
-  } catch (error: any) {
-    console.error('Error fetching bills:', error.message);
+  } catch (error: unknown) {
+    console.error('Error fetching bills:', (error as Error).message);
   } finally {
     await prisma.$disconnect();
   }

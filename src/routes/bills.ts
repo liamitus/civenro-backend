@@ -7,6 +7,23 @@ import axios from 'axios';
 const router = Router();
 const prisma = new PrismaClient();
 
+interface GovTrackApiBill {
+  display_number?: string;
+  number?: number;
+  title_without_number?: string;
+  title?: string;
+  introduced_date?: string;
+  current_status?: string;
+  current_status_date?: string;
+  current_chamber?: string;
+  bill_type?: string;
+  link?: string;
+}
+
+interface GovTrackBillApiResponse {
+  objects: GovTrackApiBill[];
+}
+
 // Fetch bills from API and cache in database
 router.get('/', async (req, res) => {
   console.log('Retrieving bills...');
@@ -28,7 +45,7 @@ router.get('/', async (req, res) => {
   const skip = (pageNumber - 1) * pageSize;
 
   // Build Prisma query filters
-  const filters: any = {};
+  const filters: Record<string, unknown> = {};
 
   // Filtering by chamber
   if (chamber && chamber !== 'both') {
@@ -49,7 +66,7 @@ router.get('/', async (req, res) => {
   }
 
   // Build sorting option
-  const sortOptions: any = {};
+  const sortOptions: Record<string, unknown> = {};
   sortOptions[sortBy as string] = order as string;
 
   try {
@@ -67,27 +84,32 @@ router.get('/', async (req, res) => {
     // If no bills are found in the database, fetch from the GovTrack API
     if (bills.length === 0 && pageNumber === 1) {
       // Fetch bills from the GovTrack API
-      const response = await axios.get('https://www.govtrack.us/api/v2/bill', {
-        params: {
-          congress: '118', // Current Congress session
-          order_by: `-${sortBy}`, // Latest bills first
-          limit: 1000, // Fetch more bills to populate the database
-        },
-      });
+      const response = await axios.get<GovTrackBillApiResponse>(
+        'https://www.govtrack.us/api/v2/bill',
+        {
+          params: {
+            congress: '118', // Current Congress session
+            order_by: `-${sortBy}`, // Latest bills first
+            limit: 1000, // Fetch more bills to populate the database
+          },
+        }
+      );
 
       // Process and save bills to the database
       const billsData = response.data.objects;
-      const processedBills = billsData.map((bill: any) => ({
-        billId: bill.display_number || bill.number.toString(),
-        title: bill.title_without_number || bill.title || 'No title available.',
-        summary: bill.title_without_number || 'No summary available.',
-        date: new Date(bill.introduced_date),
-        introducedDate: new Date(bill.introduced_date),
-        currentStatus: bill.current_status,
-        currentStatusDate: new Date(bill.current_status_date),
-        currentChamber: bill.current_chamber?.toLowerCase(),
-        billType: bill.bill_type,
-        link: bill.link,
+      const processedBills = billsData.map((bill: GovTrackApiBill) => ({
+        billId:
+          bill.display_number ??
+          (bill.number ? bill.number.toString() : 'UnknownBillId'),
+        title: bill.title_without_number ?? bill.title ?? 'No title available.',
+        summary: bill.title_without_number ?? 'No summary available.',
+        date: new Date(bill.introduced_date ?? '1970-01-01'),
+        introducedDate: new Date(bill.introduced_date ?? '1970-01-01'),
+        currentStatus: bill.current_status ?? 'unknown',
+        currentStatusDate: new Date(bill.current_status_date ?? '1970-01-01'),
+        currentChamber: bill.current_chamber?.toLowerCase() ?? 'unknown',
+        billType: bill.bill_type ?? 'unknown',
+        link: bill.link ?? '',
       }));
 
       // Save the bills to the database using Prisma's createMany
@@ -113,7 +135,7 @@ router.get('/', async (req, res) => {
       pageSize,
       bills,
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error fetching bills:', error);
     res.status(500).json({ error: 'Failed to fetch bills' });
   }
@@ -132,7 +154,7 @@ router.get('/:id', async (req, res) => {
     }
 
     res.json(bill);
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error fetching bill:', error);
     res.status(500).json({ error: 'Failed to fetch bill' });
   }
