@@ -1,12 +1,13 @@
 {
   "compilerOptions": {
-    "target": "ES6",
-    "module": "commonjs",
     "strict": true,
-    "esModuleInterop": true,
+    "noImplicitAny": true,
     "forceConsistentCasingInFileNames": true,
+    "esModuleInterop": true,
     "outDir": "./dist",
-    "typeRoots": ["./src/types", "./node_modules/@types"]
+    "typeRoots": ["./src/types", "./node_modules/@types"],
+    "module": "commonjs",
+    "target": "es2022"
   },
   "include": ["src"]
 }

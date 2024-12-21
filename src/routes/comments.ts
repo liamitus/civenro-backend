@@ -1,7 +1,7 @@
 // src/routes/comments.ts
 
 import { Router, Request, Response } from 'express';
-import { CommentVote, PrismaClient } from '@prisma/client';
+import { type CommentVote, PrismaClient } from '@prisma/client';
 import { authenticateToken } from '../middleware/auth';
 
 const router = Router();
