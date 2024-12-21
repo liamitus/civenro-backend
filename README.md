@@ -1,4 +1,4 @@
-# Civenro Backend
+# 🇺🇸 Civenro Backend
 
 The **Civenro Backend** provides the server-side logic, database interactions, and API endpoints for the Civenro civic engagement platform. It works in tandem with the [Civenro Frontend](https://github.com/liamitus/civenro) to offer a complete, transparent, and interactive legislative tracking experience.
 
