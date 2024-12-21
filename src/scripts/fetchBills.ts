@@ -11,7 +11,7 @@ const BASE_URL = 'https://www.govtrack.us/api/v2';
 
 export async function fetchBillsFunction() {
   try {
-    let lastBill = await prisma.bill.findFirst({
+    const lastBill = await prisma.bill.findFirst({
       orderBy: { introducedDate: 'desc' },
     });
     const startDate = lastBill

@@ -60,7 +60,7 @@ router.post('/by-address', async (req: Request, res: Response) => {
     }
 
     // Determine relevant chambers based on bill type
-    let relevantChambers: string[] = [];
+    const relevantChambers: string[] = [];
 
     if (bill.billType.startsWith('house_')) {
       relevantChambers.push('representative');

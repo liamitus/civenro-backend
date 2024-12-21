@@ -95,7 +95,7 @@ router.get('/bill/:billId', async (req: Request, res: Response) => {
       where: { billId, parentCommentId: null },
     });
 
-    let comments = await getCommentsWithVotes(
+    const comments = await getCommentsWithVotes(
       null,
       billId,
       sortOption,
