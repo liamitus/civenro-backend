@@ -7,6 +7,15 @@ import { authenticateToken } from '../middleware/auth';
 const router = Router();
 const prisma = new PrismaClient();
 
+interface VoteAggregation {
+  voteType?: string;
+  vote?: string;
+  _count: {
+    voteType?: number;
+    vote?: number;
+  };
+}
+
 // POST /api/votes
 // Submit a vote on a bill
 router.post('/', authenticateToken, async (req: Request, res: Response) => {
@@ -74,11 +83,11 @@ router.get('/:billId', async (req: Request, res: Response) => {
     });
 
     res.status(200).json({
-      publicVotes: publicVotes.map((v) => ({
+      publicVotes: publicVotes.map((v: VoteAggregation) => ({
         voteType: v.voteType,
         count: v._count.voteType,
       })),
-      congressionalVotes: congressionalVotes.map((v) => ({
+      congressionalVotes: congressionalVotes.map((v: VoteAggregation) => ({
         vote: v.vote,
         count: v._count.vote,
       })),

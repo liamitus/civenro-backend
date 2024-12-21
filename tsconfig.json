@@ -4,7 +4,6 @@
     "module": "commonjs",
     "strict": true,
     "esModuleInterop": true,
-    "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "outDir": "./dist",
     "typeRoots": ["./src/types", "./node_modules/@types"]

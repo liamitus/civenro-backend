@@ -1,7 +1,7 @@
 // src/routes/comments.ts
 
 import { Router, Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
+import { CommentVote, PrismaClient } from '@prisma/client';
 import { authenticateToken } from '../middleware/auth';
 
 const router = Router();
@@ -112,7 +112,10 @@ router.get('/bill/:billId', async (req: Request, res: Response) => {
 
     // Sort comments manually if sortOption is 'best'
     if (sortOption === 'best') {
-      comments.sort((a, b) => b.voteCount - a.voteCount);
+      comments.sort(
+        (a: CommentWithReplies, b: CommentWithReplies) =>
+          b.voteCount - a.voteCount
+      );
     }
 
     res.status(200).json({ comments, total });
@@ -161,7 +164,7 @@ router.get('/user/:userId', async (req: Request, res: Response) => {
     // Calculate vote counts
     const commentsWithVoteCounts = comments.map((comment) => {
       const voteCount = comment.CommentVote.reduce(
-        (sum, vote) => sum + vote.voteType,
+        (sum: number, vote: CommentVote) => sum + vote.voteType,
         0
       );
       return {
