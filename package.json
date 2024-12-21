@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "nodemon src/index.ts",
-    "build": "tsc",
+    "build": "prisma generate && tsc",
     "start": "node dist/index.js",
     "test": "dotenv -e .env.test -- bash -c 'export NODE_ENV=test && npm run test:db:start && npm run test:wait && npm run test:db:prepare && jest && npm run test:db:stop'",
     "test:debug": "dotenv -e .env.test -- bash -c 'export NODE_ENV=test && npm run test:db:start && npm run test:wait && npm run test:db:prepare && node --inspect-brk ./node_modules/.bin/jest --runInBand --detectOpenHandles'",
