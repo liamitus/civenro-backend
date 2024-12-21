@@ -87,10 +87,17 @@ sql: .PHONY
 	@echo "Opening Prisma Studio..."
 	npx prisma studio
 
-# Run the development server
-start dev run: .PHONY
+# Run the server in development mode
+start dev: .PHONY
 	@echo "Starting the development server..."
 	npm run dev
+
+# Run the server
+run: .PHONY
+	@echo "Building..."
+	npm run build
+	@echo "Starting the server..."
+	npm run start
 
 # Run tests
 test: .PHONY

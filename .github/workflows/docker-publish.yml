@@ -1,0 +1,29 @@
+name: Publish Docker Image
+
+on:
+  push:
+    branches: ['main']
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      # 1. Check out the backend code
+      - name: Check out code
+        uses: actions/checkout@v3
+
+      # 2. Log in to GitHub Container Registry
+      - name: Log in to GHCR
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      # 3. Build the Docker image
+      - name: Build image
+        run: |
+          docker build \
+            --file Dockerfile \
+            --tag ghcr.io/${{ github.repository_owner }}/civenro-backend:latest \
+            .
+
+      # 4. Push the Docker image
+      - name: Push image
+        run: docker push ghcr.io/${{ github.repository_owner }}/civenro-backend:latest

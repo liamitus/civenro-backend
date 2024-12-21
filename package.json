@@ -16,7 +16,7 @@
     "seed": "ts-node src/scripts/seed.ts",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "deploy": "prisma migrate deploy && prisma db seed"
+    "migrate": "prisma migrate deploy && prisma db seed"
   },
   "keywords": [],
   "author": "",
