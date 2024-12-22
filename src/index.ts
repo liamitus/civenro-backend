@@ -41,9 +41,14 @@ app.use('/api/representatives', representativesRouter);
 app.use('/api/users', userRouter);
 app.use('/api/votes', votesRouter);
 
-// Health Check Route
+// Root Health Check Route
 app.get('/', (req, res) => {
   res.send('Government Bills Platform API is running.');
+});
+
+// Additional Health Check Route
+app.get('/health', (req, res) => {
+  res.send('OK');
 });
 
 if (process.env.NODE_ENV !== 'test') {
