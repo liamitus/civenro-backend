@@ -48,7 +48,8 @@ app.get('/', (req, res) => {
 
 // Additional Health Check Route
 app.get('/health', (req, res) => {
-  res.send('OK');
+  console.log('Health check endpoint hit');
+  res.status(200).send('OK');
 });
 
 if (process.env.NODE_ENV !== 'test') {
