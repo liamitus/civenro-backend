@@ -31,6 +31,14 @@ app.use(
 
 console.log(`CORS Origin set to: ${process.env.FRONTEND_URL}`);
 
+if (process.env.NODE_ENV === 'development') {
+  // Skip caching in development/CI environments
+  app.use('/api', (_, res, next) => {
+    res.set('Cache-Control', 'no-store');
+    next();
+  });
+}
+
 app.use(express.json());
 
 // Define routes here
