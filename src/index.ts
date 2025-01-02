@@ -29,6 +29,8 @@ app.use(
   })
 );
 
+console.log(`CORS Origin set to: ${process.env.FRONTEND_URL}`);
+
 app.use(express.json());
 
 // Define routes here

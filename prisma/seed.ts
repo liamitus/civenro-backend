@@ -7,6 +7,12 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('Seeding database...');
 
+  const userCount = await prisma.user.count();
+  if (userCount > 0) {
+    console.log('Users already seeded. Skipping...');
+    return;
+  }
+
   // Create a test user
   const user = await prisma.user.create({
     data: {
