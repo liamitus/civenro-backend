@@ -65,11 +65,11 @@ describe('getRepresentativesByAddress', () => {
   });
 
   it('should throw an error if the request fails', async () => {
-    const mockError = new Error('Network Error');
+    const mockError = new Error('Expected test error');
     mockedAxios.get.mockRejectedValueOnce(mockError);
 
     await expect(getRepresentativesByAddress(address)).rejects.toThrow(
-      'Network Error'
+      'Expected test error'
     );
   });
 });

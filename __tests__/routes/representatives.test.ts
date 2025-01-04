@@ -158,7 +158,9 @@ describe('POST /api/representatives/by-address', () => {
 
   it('should handle errors gracefully', async () => {
     // Force an error in getRepresentativesByAddress
-    mockedGetRepresentativesByAddress.mockRejectedValue(new Error('API Error'));
+    mockedGetRepresentativesByAddress.mockRejectedValue(
+      new Error('Expected test error')
+    );
 
     const res = await request(app)
       .post(ENDPOINT)
