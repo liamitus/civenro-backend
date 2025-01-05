@@ -3,6 +3,7 @@
 import { Router } from 'express';
 import { PrismaClient } from '@prisma/client';
 import axios from 'axios';
+import { statusMapping } from '../utils/statusMapping';
 
 const router = Router();
 const prisma = new PrismaClient();
@@ -53,8 +54,14 @@ router.get('/', async (req, res) => {
   }
 
   // Filtering by status
-  if (status) {
-    filters.currentStatus = status.toString().toLowerCase();
+  if (status && typeof status === 'string') {
+    // If the status is recognized in our mapping, filter by all possibilities:
+    if (statusMapping[status]) {
+      filters.currentStatus = {
+        in: statusMapping[status],
+      };
+    }
+    // If the user picks "All" or something not in mapping, skip filtering
   }
 
   // Search by title
