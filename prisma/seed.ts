@@ -8,9 +8,11 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('Seeding database...');
 
-  const userCount = await prisma.user.count();
-  if (userCount > 0) {
-    console.log('Users already seeded. Skipping...');
+  const seedUser = await prisma.user.findUnique({
+    where: { email: 'seed@example.com' },
+  });
+  if (seedUser) {
+    console.log('Users already seeded. Skipping rest of seed script.');
     return;
   }
 
