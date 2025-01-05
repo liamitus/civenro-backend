@@ -17,6 +17,7 @@ import commentVotesRouter from './routes/commentVotes';
 import representativesRouter from './routes/representatives';
 import userRouter from './routes/users';
 import votesRouter from './routes/votes';
+import prisma from './prismaClient';
 
 const app = express();
 const PORT = process.env.PORT || 5001;
@@ -64,6 +65,9 @@ app.get('/health', (req, res) => {
 
 if (process.env.NODE_ENV !== 'test') {
   app.listen(PORT, () => {
+    prisma.$connect().then(() => {
+      console.log('Connected to the database');
+    });
     console.log(`Server is running on port ${PORT}`);
   });
 }
