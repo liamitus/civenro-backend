@@ -10,6 +10,7 @@ if (process.env.NODE_ENV !== 'test') {
 import express from 'express';
 import cors from 'cors';
 import adminRouter from './routes/admin';
+import aiChatRouter from './routes/aiChat';
 import authRouter from './routes/auth';
 import billsRouter from './routes/bills';
 import commentsRouter from './routes/comments';
@@ -44,6 +45,7 @@ app.use(express.json());
 
 // Define routes here
 app.use('/api/admin', adminRouter);
+app.use('/api/ai', aiChatRouter);
 app.use('/api/auth', authRouter);
 app.use('/api/bills', billsRouter);
 app.use('/api/comments', commentsRouter);
@@ -62,6 +64,8 @@ app.get('/health', (req, res) => {
   console.log('Health check endpoint hit');
   res.status(200).send('OK');
 });
+
+console.log(`NODE_ENV: ${process.env.NODE_ENV}`);
 
 if (process.env.NODE_ENV !== 'test') {
   app.listen(PORT, () => {
