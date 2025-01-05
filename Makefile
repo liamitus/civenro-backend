@@ -32,21 +32,21 @@ db: .PHONY
 
 fetch-bills: .PHONY
 	@echo "Fetching bills data..."
-	npx ts-node src/scripts/fetchBills.ts
+	curl -X POST http://localhost:5001/api/admin/fetch-bills
 
 fetch-data fetch: .PHONY
 	@echo "Fetching data..."
-	npx ts-node src/scripts/fetchRepresentatives.ts
-	npx ts-node src/scripts/fetchBills.ts
-	npx ts-node src/scripts/fetchVotes.ts
+	curl -X POST http://localhost:5001/api/admin/fetch-bills
+	curl -X POST http://localhost:5001/api/admin/fetch-representatives
+	curl -X POST http://localhost:5001/api/admin/fetch-votes
 
 fetch-representatives: .PHONY
 	@echo "Fetching representatives data..."
-	npx ts-node src/scripts/fetchRepresentatives.ts
+	curl -X POST http://localhost:5001/api/admin/fetch-representatives
 
 fetch-votes: .PHONY
 	@echo "Fetching votes data..."
-	npx ts-node src/scripts/fetchVotes.ts
+	curl -X POST http://localhost:5001/api/admin/fetch-votes
 
 # Format the codebase
 format: .PHONY

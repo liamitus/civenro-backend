@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "npm run dev:db && nodemon src/index.ts",
+    "dev": "npm run dev:db && NODE_ENV=\"development\" nodemon src/index.ts",
     "dev:db": "docker compose up -d && npx prisma db seed",
     "dev:db:down": "docker compose down",
     "build": "prisma generate && tsc",
