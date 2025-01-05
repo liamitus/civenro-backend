@@ -7,17 +7,6 @@ generator client {
   provider = "prisma-client-js"
 }
 
-model User {
-  id          Int           @id @default(autoincrement())
-  username    String        @unique
-  email       String        @unique
-  password    String
-  createdAt   DateTime      @default(now())
-  votes       Vote[]
-  comments    Comment[]
-  CommentVote CommentVote[]
-}
-
 model Bill {
   id                Int                  @id @default(autoincrement())
   billId            String               @unique
@@ -32,18 +21,6 @@ model Bill {
   votes             RepresentativeVote[]
   Vote              Vote[]
   Comment           Comment[]
-}
-
-model Vote {
-  id       Int    @id @default(autoincrement())
-  userId   Int
-  billId   Int
-  voteType String
-
-  user User @relation(fields: [userId], references: [id])
-  bill Bill @relation(fields: [billId], references: [id])
-
-  @@unique([userId, billId]) // Prevent duplicate votes by the same user
 }
 
 model Comment {
@@ -98,4 +75,27 @@ model RepresentativeVote {
   bill           Bill           @relation(fields: [billId], references: [id])
 
   @@unique([representativeId, billId])
+}
+
+model User {
+  id          Int           @id @default(autoincrement())
+  username    String        @unique
+  email       String        @unique
+  password    String
+  createdAt   DateTime      @default(now())
+  votes       Vote[]
+  comments    Comment[]
+  CommentVote CommentVote[]
+}
+
+model Vote {
+  id       Int    @id @default(autoincrement())
+  userId   Int
+  billId   Int
+  voteType String
+
+  user User @relation(fields: [userId], references: [id])
+  bill Bill @relation(fields: [billId], references: [id])
+
+  @@unique([userId, billId]) // Prevent duplicate votes by the same user
 }
