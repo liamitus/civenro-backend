@@ -87,6 +87,11 @@ sql: .PHONY
 	@echo "Opening Prisma Studio..."
 	npx prisma studio
 
+# Connect to the production database
+sql-prod: .PHONY
+	@echo "Connecting to production database..."
+	railway connect Postgres 
+
 # Run the server in development mode
 start dev: .PHONY
 	@echo "Starting the development server..."
