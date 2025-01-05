@@ -16,7 +16,7 @@ export async function fetchBillsFunction() {
     });
     const startDate = lastBill
       ? dayjs(lastBill.introducedDate).subtract(6, 'months')
-      : dayjs('1980-01-01');
+      : dayjs('2024-01-01');
     const endDate = dayjs();
     let currentDate = startDate;
 
