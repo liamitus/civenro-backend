@@ -68,12 +68,12 @@ describe('Auth Endpoints', () => {
       expect(payload).toHaveProperty('userId');
     });
 
-    it('should fail with invalid credentials', async () => {
+    it('should fail with Invalid email or password', async () => {
       const response = await request(app)
         .post('/api/auth/login')
         .send({ email: 'test@example.com', password: 'WrongPass' });
       expect(response.status).toBe(400);
-      expect(response.body.error).toBe('Invalid credentials');
+      expect(response.body.error).toBe('Invalid email or password');
     });
   });
 });
