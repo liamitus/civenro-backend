@@ -23,6 +23,13 @@ model Bill {
   Comment           Comment[]
 }
 
+model BillEmbedding {
+  id       String  @id @default(cuid())
+  billId   String
+  chunk    String
+  vector   Json
+}
+
 model Comment {
   id              Int      @id @default(autoincrement())
   content         String
@@ -49,6 +56,24 @@ model CommentVote {
   comment Comment @relation(fields: [commentId], references: [id])
 
   @@unique([userId, commentId])
+}
+
+model Conversation {
+  id        String    @id @default(cuid())
+  userId    String
+  billId    String
+  messages  Message[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Message {
+  id             String       @id @default(cuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id])
+  sender         String       // e.g., "user" or "ai"
+  text           String
+  createdAt      DateTime     @default(now())
 }
 
 model Representative {
