@@ -81,53 +81,6 @@ router.get('/', async (req, res) => {
       orderBy: sortOptions,
     });
 
-    // If no bills are found in the database, fetch from the GovTrack API
-    if (bills.length === 0 && pageNumber === 1) {
-      // Fetch bills from the GovTrack API
-      const response = await axios.get<GovTrackBillApiResponse>(
-        'https://www.govtrack.us/api/v2/bill',
-        {
-          params: {
-            congress: '118', // Current Congress session
-            order_by: `-${sortBy}`, // Latest bills first
-            limit: 1000, // Fetch more bills to populate the database
-          },
-        }
-      );
-
-      // Process and save bills to the database
-      const billsData = response.data.objects;
-      const processedBills = billsData.map((bill: GovTrackApiBill) => ({
-        billId:
-          bill.display_number ??
-          (bill.number ? bill.number.toString() : 'UnknownBillId'),
-        title: bill.title_without_number ?? bill.title ?? 'No title available.',
-        summary: bill.title_without_number ?? 'No summary available.',
-        date: new Date(bill.introduced_date ?? '1970-01-01'),
-        introducedDate: new Date(bill.introduced_date ?? '1970-01-01'),
-        currentStatus: bill.current_status ?? 'unknown',
-        currentStatusDate: new Date(bill.current_status_date ?? '1970-01-01'),
-        currentChamber: bill.current_chamber?.toLowerCase() ?? 'unknown',
-        billType: bill.bill_type ?? 'unknown',
-        link: bill.link ?? '',
-      }));
-
-      // Save the bills to the database using Prisma's createMany
-      await prisma.bill.createMany({
-        data: processedBills,
-        skipDuplicates: true, // Avoids error if the bill already exists
-      });
-
-      // Retrieve the bills again from the database
-      billsCount = await prisma.bill.count({ where: filters });
-      bills = await prisma.bill.findMany({
-        where: filters,
-        skip,
-        take: pageSize,
-        orderBy: sortOptions,
-      });
-    }
-
     // Send the bills and total count for pagination
     res.json({
       total: billsCount,
