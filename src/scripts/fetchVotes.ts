@@ -23,9 +23,15 @@ interface GovTrackBillData {
 
 export async function fetchVotesFunction() {
   try {
-    const startDate = dayjs().subtract(4, 'year'); // Adjust as needed
-    const endDate = dayjs();
+    // Retrieve last fetched date or default to 2 years ago
+    const lastFetchedSetting = await prisma.setting.findUnique({
+      where: { key: 'lastFetched' },
+    });
+    const startDate = lastFetchedSetting
+      ? dayjs(lastFetchedSetting.value)
+      : dayjs().subtract(2, 'year');
 
+    const endDate = dayjs();
     let currentDate = startDate;
 
     // Implement a cache for bills to avoid redundant API calls
@@ -143,6 +149,12 @@ export async function fetchVotesFunction() {
 
       currentDate = nextDate;
     }
+
+    await prisma.setting.upsert({
+      where: { key: 'lastFetched' },
+      update: { value: endDate.toISOString() },
+      create: { key: 'lastFetched', value: endDate.toISOString() },
+    });
 
     console.log('Votes fetched and stored successfully.');
   } catch (error: unknown) {
