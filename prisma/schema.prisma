@@ -21,6 +21,7 @@ model Bill {
   votes             RepresentativeVote[]
   Vote              Vote[]
   Comment           Comment[]
+  billTexts         BillText[]
 }
 
 model BillEmbedding {
@@ -28,6 +29,14 @@ model BillEmbedding {
   billId   String
   chunk    String
   vector   Json
+}
+
+model BillText {
+  id         Int      @id @default(autoincrement())
+  billId     Int
+  heading    String
+  text       String
+  bill       Bill     @relation(fields: [billId], references: [id])
 }
 
 model Comment {
@@ -100,6 +109,12 @@ model RepresentativeVote {
   bill           Bill           @relation(fields: [billId], references: [id])
 
   @@unique([representativeId, billId])
+}
+
+model Setting {
+  id    Int    @id @default(autoincrement())
+  key   String @unique
+  value String
 }
 
 model User {
