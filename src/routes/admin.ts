@@ -4,6 +4,7 @@ import { Router } from 'express';
 import { fetchBillsFunction } from '../scripts/fetchBills';
 import { fetchRepresentativesFunction } from '../scripts/fetchRepresentatives';
 import { fetchVotesFunction } from '../scripts/fetchVotes';
+import { fetchBillTextFunction } from '../scripts/fetchBillText';
 
 const router = Router();
 
@@ -49,6 +50,19 @@ router.post('/fetch-votes', async (req, res) => {
   } catch (error: unknown) {
     console.error('Error in fetch-votes endpoint:', (error as Error).message);
     res.status(500).json({ error: 'Failed to fetch votes.' });
+  }
+});
+
+router.post('/fetch-bill-text', async (req, res) => {
+  try {
+    await fetchBillTextFunction();
+    res.json({ message: 'Bill text fetched successfully.' });
+  } catch (error: unknown) {
+    console.error(
+      'Error in fetch-bill-text endpoint:',
+      (error as Error).message
+    );
+    res.status(500).json({ error: 'Failed to fetch bill text.' });
   }
 });
 
