@@ -36,9 +36,19 @@ function parseBillOrResolution(
   for (const lb of legisBodies) {
     // inside each <legis-body>, find <section> children
     const sections = lb.$$.filter((c: any) => c['#name'] === 'section');
+
     for (const sec of sections) {
       const { sectionEnum, sectionHeader } = extractSectionHeading(sec);
-      const topLevelHeading = buildSectionHeading(sectionEnum, sectionHeader);
+
+      // We'll build two forms:
+      // 1) numericHeading = "SEC. {sectionEnum}."
+      // 2) fullHeading = numericHeading + " " + {sectionHeader}
+      // e.g. numericHeading = "SEC. 2."
+      //      fullHeading = "SEC. 2. Repayment of Federal financial assistance..."
+      const numericHeading = `SEC. ${sectionEnum}`;
+      const fullHeading = sectionHeader
+        ? `${numericHeading} ${sectionHeader}`
+        : numericHeading;
 
       // see if <section> has <subsection> children
       const subsecs = sec.$$.filter((ch: any) => ch['#name'] === 'subsection');
@@ -49,17 +59,25 @@ function parseBillOrResolution(
           // Special handling for "Short title"
           content = findShortTitle(sec);
         } else {
-          // If it’s not a short title, just look for <text> or child nodes
+          // If it’s not a short title, just gather direct text
           content = findDirectText(sec);
         }
 
-        results.push({ heading: topLevelHeading, content });
+        // Just push "fullHeading" (e.g. "SEC. 2. Repayment...")
+        results.push({ heading: fullHeading, content });
       } else {
         // multiple subsections => one chunk per <subsection>
+        // Optionally, you can store a "top-level" section record as well
+        // If you want the top-level heading + empty content, you could do:
+        // results.push({ heading: fullHeading, content: '' });
+
         for (const sub of subsecs) {
           const { subEnum, subHeader } = extractSubsectionHeading(sub);
+
+          // Build a subsection heading using only numericHeading, not the entire "Repayment..." header
+          // So we get "SEC. 2. (a) In general" instead of "SEC. 2. Repayment... (a) In general"
           const subHeading = buildSubsectionHeading(
-            topLevelHeading,
+            numericHeading, // base "SEC. 2."
             subEnum,
             subHeader
           );
@@ -67,13 +85,14 @@ function parseBillOrResolution(
           // Gather text from the subsection
           let content = parseChildrenInOrder(sub);
 
-          // Remove leading subsection enumeration and header if present
+          // Remove leading subsection enumeration/header if present in the text
+          // (this is optional or up to your preference)
           const prefix = `${subEnum} ${subHeader}`.trim();
-          if (content.startsWith(prefix)) {
+          if (prefix && content.startsWith(prefix)) {
             content = content.substring(prefix.length).trim();
           }
 
-          if (content.length > 20) {
+          if (content.length > 0) {
             results.push({ heading: subHeading, content });
           }
         }
