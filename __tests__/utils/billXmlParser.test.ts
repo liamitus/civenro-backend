@@ -2,46 +2,32 @@
 import fs from 'fs';
 import path from 'path';
 import { parseStringPromise } from 'xml2js';
+import { BillTextService } from '../../src/services/BillTextService';
 import { BillXmlParser } from '../../src/utils/billXmlParser';
 
 describe('BillXmlParser', () => {
   const xmlFixturesDir = path.join(__dirname, '..', 'fixtures', 'xml');
   const jsonFixturesDir = path.join(__dirname, '..', 'fixtures', 'json');
 
-  /**
-   * If you want to test multiple files in a single suite, you can
-   * store them in an array or read the directory dynamically.
-   */
-  const testCases = [
-    {
-      name: 'H_R9326_Introduced_in_House',
-      xmlFile: 'H_R9326_Introduced_in_House.xml',
-      jsonFile: 'H_R9326_Introduced_in_House.json',
-    },
-    // Add more fixture pairs here as needed
-  ];
+  // Read the directory for .xml files
+  const xmlFiles = fs
+    .readdirSync(xmlFixturesDir)
+    .filter((file) => file.endsWith('.xml'));
 
-  testCases.forEach(({ name, xmlFile, jsonFile }) => {
-    it(`should correctly parse fixture: ${name}`, async () => {
+  xmlFiles.forEach((xmlFile) => {
+    it(`should correctly parse fixture: ${xmlFile}`, async () => {
       // 1. Read the XML content
       const xmlPath = path.join(xmlFixturesDir, xmlFile);
       const xmlContent = fs.readFileSync(xmlPath, 'utf-8');
 
-      // 2. Convert XML -> JS object
-      const xmlObj = await parseStringPromise(xmlContent, {
-        preserveChildrenOrder: true,
-        explicitChildren: true,
-      });
-
       // 3. Extract the sections using your parser
-      //    - If you prefer BillTextService, do:
-      //    // const sections = await BillTextService.parseXmlIntoSections(xmlContent);
-      //    const sections = BillTextService.parseXmlIntoSections(xmlContent);
-      //    - Otherwise, if you’re only testing the parser:
-      const sections = await BillXmlParser.extractSections(xmlObj);
+      const sections = await BillTextService.parseXmlIntoSections(xmlContent);
 
-      // 4. Compare against the expected JSON
+      // Derive the JSON filename from the XML filename
+      const baseName = path.parse(xmlFile).name; // e.g. H118_HR_9326_IH
+      const jsonFile = `${baseName}.json`;
       const jsonPath = path.join(jsonFixturesDir, jsonFile);
+
       if (!fs.existsSync(jsonPath)) {
         // If the JSON file does not exist, write it out
         fs.writeFileSync(jsonPath, JSON.stringify(sections, null, 2), 'utf-8');

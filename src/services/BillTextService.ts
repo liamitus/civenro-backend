@@ -107,6 +107,10 @@ export class BillTextService {
       xmlObj = await parseStringPromise(rawXml, {
         preserveChildrenOrder: true,
         explicitChildren: true,
+        charsAsChildren: true,
+        // optional for tidier output:
+        trim: true,
+        includeWhiteChars: false,
       });
     } catch (e: any) {
       console.error('Failed to parse XML:', e.message);

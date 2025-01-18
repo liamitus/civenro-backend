@@ -83,7 +83,7 @@ function parseBillOrResolution(
           );
 
           // Gather text from the subsection
-          let content = parseChildrenInOrder(sub);
+          let content = parseNodeInReadingOrder(sub);
 
           // Remove leading subsection enumeration/header if present in the text
           // (this is optional or up to your preference)
@@ -119,8 +119,14 @@ function extractSectionHeading(sectionNode: any) {
   }
 
   const hChild = sectionNode.$$.find((ch: any) => ch['#name'] === 'header');
-  if (hChild && typeof hChild._ === 'string') {
-    sectionHeader = hChild._.trim();
+  if (hChild) {
+    if (hChild.$$ && hChild.$$.length > 0) {
+      sectionHeader = parseNodeInReadingOrder(hChild)
+        .replace(/\s+/g, ' ')
+        .trim();
+    } else if (typeof hChild._ === 'string') {
+      sectionHeader = hChild._.trim();
+    }
   }
 
   return { sectionEnum, sectionHeader };
@@ -138,25 +144,15 @@ function extractSubsectionHeading(subNode: any) {
   }
 
   const hChild = subNode.$$.find((ch: any) => ch['#name'] === 'header');
-  if (hChild && typeof hChild._ === 'string') {
-    subHeader = hChild._.trim();
+  if (hChild) {
+    if (hChild.$$ && hChild.$$.length > 0) {
+      subHeader = parseNodeInReadingOrder(hChild).replace(/\s+/g, ' ').trim();
+    } else if (typeof hChild._ === 'string') {
+      subHeader = hChild._.trim();
+    }
   }
 
   return { subEnum, subHeader };
-}
-
-/**
- * Build a heading like "SEC. 2. Repayment of Federal financial assistance..."
- */
-function buildSectionHeading(
-  sectionEnum: string,
-  sectionHeader: string
-): string {
-  if (!sectionEnum && !sectionHeader) return '';
-  if (sectionEnum.toLowerCase().startsWith('sec.')) {
-    return `${sectionEnum} ${sectionHeader}`.trim();
-  }
-  return `SEC. ${sectionEnum} ${sectionHeader}`.trim();
 }
 
 /**
@@ -183,92 +179,146 @@ function buildSubsectionHeading(
 // ---------------------------------------------------------------------
 
 /**
- * parseChildrenInOrder: read node.$$ (the array of child objects),
- * and build a single string, preserving the order in which they appear.
+ * parseNodeInReadingOrder:
+ *   - Takes a node from xml2js with `preserveChildrenOrder: true`.
+ *   - Returns the fully reconstructed text, with inline elements placed in correct sequence.
+ *   - No reliance on literal `()` in the parent text for <external-xref>.
+ *   - We explicitly decide how to handle each tag, e.g. wrap <external-xref> in parentheses.
  */
-function parseChildrenInOrder(node: any): string {
-  if (!node.$$) return '';
+function parseNodeInReadingOrder(node: any): string {
+  // If this node has no children, see if there's direct text in node._
+  if (!Array.isArray(node.$$)) {
+    return typeof node._ === 'string' ? node._ : '';
+  }
 
-  let out = '';
+  let output = '';
+
+  // Detect whether to ignore the parent __text__
+  const hasEnumChild = node.$$.some((ch: any) => ch['#name'] === 'enum');
+  const hasHeaderChild = node.$$.some((ch: any) => ch['#name'] === 'header');
+
+  // Iterate the children in the order they appear
   for (const child of node.$$) {
     switch (child['#name']) {
-      case '_':
-        // Plain text content
-        out += child._;
-        break;
-
-      case 'quote': {
-        // A <quote> might contain <short-title> or text
-        const quoteText = parseChildrenInOrder(child).trim();
-        // Wrap quote text in quotation marks
-        if (quoteText) out += `"${quoteText}"`;
+      // -----------------------------------------
+      // 1) Text chunk
+      // -----------------------------------------
+      case '__text__': {
+        // If we see text like "(a) FCC Auction 97..." and we also see an <enum> child
+        // that has "(a)", plus a <header> child that has "FCC Auction 97 reauction…",
+        // we can skip adding this text altogether:
+        if (hasEnumChild || hasHeaderChild) {
+          // skip it
+          break;
+        }
+        // Otherwise, keep it
+        output += child._;
         break;
       }
 
-      case 'term':
-        // e.g. <term>SomeTerm</term>
-        out += ' ' + parseChildrenInOrder(child);
+      // -----------------------------------------------------------------
+      // 2) External references (inline), e.g. <external-xref>47 U.S.C. 309(j)</external-xref>
+      // -----------------------------------------------------------------
+      case 'external-xref': {
+        const xrefText = parseNodeInReadingOrder(child).trim();
+        // Revert to parentheses around the reference
+        output += `${xrefText}`;
         break;
+      }
 
-      case 'short-title': {
-        // e.g. <short-title>Some Act Title</short-title>
+      // -----------------------------------------------------------------
+      // 3) Quote tags, e.g. <quote>$1,900,000,000</quote>
+      // -----------------------------------------------------------------
+      case 'quote': {
+        // Keep quotes inline without extra spacing after the preceding text
+        let quoteText = '';
         if (typeof child._ === 'string') {
-          out += child._;
-        } else if (child.$$) {
-          out += parseChildrenInOrder(child);
+          // e.g. $1,900,000,000
+          quoteText = child._.trim();
+        } else if (Array.isArray(child.$$)) {
+          quoteText = parseNodeInReadingOrder(child).trim();
+        }
+        if (quoteText) {
+          output += ` "${quoteText}"`;
         }
         break;
       }
 
-      case 'paragraph':
-        out += ' ' + parseParagraph(child);
+      // -----------------------------------------------------------------
+      // 4) short-title, term, etc.
+      //    We treat these similarly: parse content, add any styling or punctuation
+      // -----------------------------------------------------------------
+      case 'short-title':
+      case 'emphasis':
+      case 'symbol': {
+        const inlineText = parseNodeInReadingOrder(child);
+        output += inlineText;
         break;
+      }
+
+      case 'term': {
+        // Wrap term content in quotes for clarity.
+        const termText = parseNodeInReadingOrder(child).trim();
+        output += ` "${termText}"`;
+        break;
+      }
+
+      case 'paragraph': {
+        const paraText = parseParagraph(child);
+        output += paraText;
+        break;
+      }
 
       case 'text': {
-        // <text> can often have direct text in child._ or nested children
-        if (typeof child._ === 'string') {
-          out += ' ' + child._;
+        // If <text> has child nodes, skip child._ because it's probably duplicated
+        if (child.$$ && child.$$.length > 0) {
+          output += parseNodeInReadingOrder(child);
+        } else if (typeof child._ === 'string') {
+          // Only use child._ if there are no children
+          output += child._;
         }
-        if (child.$$) {
-          out += ' ' + parseChildrenInOrder(child);
-        }
-        break;
-      }
-
-      case 'clause':
-      case 'subparagraph':
-      case 'item':
-      case 'subsection':
-      case 'section':
-      case 'preamble': {
-        // Recursively parse
-        out += ' ' + parseChildrenInOrder(child);
         break;
       }
 
       case 'enum':
         if (typeof child._ === 'string') {
-          out += ` ${child._}`;
+          const enumText = child._.trim();
+          output += ` ${enumText} `;
         }
         break;
 
-      case 'header':
-        if (typeof child._ === 'string') {
-          out += ' ' + child._;
-        }
-        break;
-
-      default:
-        // Possibly handle <table>, <list>, etc. if you have them
+      case 'header': {
+        // Remove newlines/spaces so headings stay on one line
         if (child.$$) {
-          out += ' ' + parseChildrenInOrder(child);
+          output += ' ' + parseNodeInReadingOrder(child).replace(/\s+/g, ' ');
         }
         break;
+      }
+
+      // -----------------------------------------------------------------
+      // 5) Sub-structural nodes, like <paragraph>, <subsection>, <section>, <preamble>, etc.
+      //    We parse them recursively, then add them with a space or newline, etc.
+      // -----------------------------------------------------------------
+      case 'subparagraph':
+      case 'item':
+      case 'subsection':
+      case 'section':
+      case 'preamble':
+      case 'header':
+      default: {
+        // For these structural nodes, parse recursively
+        // and separate them with a space so we don't jam words together.
+        const nestedText = parseNodeInReadingOrder(child);
+        output += ` ${nestedText}`;
+        break;
+      }
     }
   }
 
-  // Clean up extra spaces
-  return out.trim().replace(/\s+/g, ' ');
+  // Clean up extra spacing around parentheses
+  output = output.replace(/\(\s+/g, '(').replace(/\s+\)/g, ')');
+  // Optionally, post-process the output to condense extra whitespace:
+  return output.replace(/\s+/g, ' ').trim();
 }
 
 /**
@@ -315,14 +365,15 @@ function parseParagraph(node: any): string {
 
     // Handle <text> nodes
     if (child['#name'] === 'text') {
-      if (typeof child._ === 'string') out += ' ' + child._;
       if (child.$$) {
-        out += ' ' + parseChildrenInOrder(child);
+        out += ' ' + parseNodeInReadingOrder(child);
+      } else if (typeof child._ === 'string') {
+        out += ' ' + child._;
       }
     }
     // Handle <subparagraph> nodes
     else if (child['#name'] === 'subparagraph') {
-      out += ' ' + parseChildrenInOrder(child);
+      out += ' ' + parseNodeInReadingOrder(child);
     }
     // Recursively handle other nodes
     else {
@@ -351,10 +402,7 @@ function findShortTitle(sectionNode: any): string {
         (child: any) => child['#name'] === 'short-title'
       );
       if (stChild) {
-        // if direct text
-        if (typeof stChild._ === 'string') return stChild._.trim();
-        // or parse children
-        if (stChild.$$) return parseChildrenInOrder(stChild).trim();
+        if (stChild.$$) return parseNodeInReadingOrder(stChild).trim();
       }
     }
   }
@@ -372,13 +420,9 @@ function findDirectText(sectionNode: any): string {
   if (!textNode) return '';
 
   let output = '';
-  // If there's direct text in textNode._, append it
-  if (typeof textNode._ === 'string') {
-    output += textNode._;
-  }
   // Also parse any nested children (paragraph, subparagraph, etc.)
   if (textNode.$$) {
-    output += ' ' + parseChildrenInOrder(textNode);
+    output += ' ' + parseNodeInReadingOrder(textNode);
   }
 
   return output.trim().replace(/\s+/g, ' ');
